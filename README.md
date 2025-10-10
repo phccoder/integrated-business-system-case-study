@@ -1,4 +1,4 @@
-# APC Integrated Business Systems
+# Integrated Business Management System
 
 A multi-system web application designed to centralize business operations, featuring a complete Inventory Management System, a real-time Chat System, a Biometrics & Attendance System, and a Marketing Saturation tracker. Built on a modern, secure, and scalable technology stack.
 
