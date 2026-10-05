@@ -1,351 +1,162 @@
-# APC Integrated Business Systems (APCHub)
+# APC Integrated Business Systems (APCHub) — Case Study
 
-[![PHP](https://img.shields.io/badge/PHP-8.3+-%23777BB4?logo=php&logoColor=white)](https://www.php.net)
-[![Laravel](https://img.shields.io/badge/Laravel-13.x-%23FF2D20?logo=laravel&logoColor=white)](https://laravel.com)
-[![Livewire](https://img.shields.io/badge/Livewire-4-%23fb70a9)](https://livewire.laravel.com)
-[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3-%2306B6D4?logo=tailwindcss&logoColor=white)](https://tailwindcss.com)
-[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-%234169E1?logo=postgresql&logoColor=white)](https://www.postgresql.org)
-[![Python](https://img.shields.io/badge/Python-3.13-%233776AB?logo=python&logoColor=white)](https://www.python.org)
-[![Docker](https://img.shields.io/badge/Docker-%232496ED?logo=docker&logoColor=white)](https://www.docker.com)
+[![PHP](https://img.shields.io/badge/PHP-8.4+-777BB4?logo=php&logoColor=white)](https://www.php.net)
+[![Laravel](https://img.shields.io/badge/Laravel-13.31-FF2D20?logo=laravel&logoColor=white)](https://laravel.com)
+[![Livewire](https://img.shields.io/badge/Livewire-4.x-fb70a9)](https://livewire.laravel.com)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.4-06B6D4?logo=tailwindcss&logoColor=white)](https://tailwindcss.com)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?logo=postgresql&logoColor=white)](https://www.postgresql.org)
+[![Python](https://img.shields.io/badge/Python-3.13-3776AB?logo=python&logoColor=white)](https://www.python.org)
+[![Vite](https://img.shields.io/badge/Vite-6.x-646CFF?logo=vite&logoColor=white)](https://vitejs.dev)
 
-**An enterprise platform that unifies multi-branch financial operations, HR and biometric
-timekeeping, field marketing, and IT infrastructure management into three interlocking systems.**
+**An enterprise platform that unifies multi-branch financial operations, HR and biometric timekeeping, field marketing, IT asset management, and real-time collaboration into three interlocking systems.**
 
-> **About this repository** — This is a *public case-study mirror* of a private, production
-> codebase. Source code, credentials, and deployment specifics remain private; this document
-> presents the product and the engineering behind it. Interested in a closer look? Open an
-> issue or request a demo and we can walk through a live environment.
-
----
+> *This is an engineering case study of a production-grade Laravel monolith deployed across multiple branch offices with on-premises biometric hardware integration.*
 
 ## Table of Contents
 
 - [The Challenge](#the-challenge)
 - [The Solution — Three Interlocking Systems](#the-solution--three-interlocking-systems)
-- [What This Project Demonstrates](#what-this-project-demonstrates)
+- [Scale & Codebase Metrics](#scale--codebase-metrics)
 - [Feature Highlights](#feature-highlights)
 - [Technical Architecture](#technical-architecture)
-- [Edge & Automation Engineering](#edge--automation-engineering)
+- [Edge & Hardware Integration](#edge--hardware-integration)
+- [Data Reconciliation & Automation](#data-reconciliation--automation)
 - [Tech Stack](#tech-stack)
-- [Developer Setup](#developer-setup)
-- [Repository Layout](#repository-layout)
-
----
+- [Security & Compliance](#security--compliance)
+- [Deployment & Operations](#deployment--operations)
+- [Mobile-First Design](#mobile-first-design)
+- [Testing](#testing)
+- [Key Engineering Decisions](#key-engineering-decisions)
 
 ## The Challenge
 
-A multi-branch financial institution operated on disconnected islands: a legacy pension
-database, paper-based field operations, independently configured fingerprint time-attendance
-machines at every branch, and no shared view across corporate, HR, marketing, and IT.
+A multi-branch financial institution operating across multiple locations faced fragmented systems that impeded operational visibility and created manual overhead:
 
-The organization needed a single platform that could:
-
-- **Centralize operations** — loans, passbook/ATM releases, pensions, and administrative
-  workflows in one audited system with role-based access per branch.
-- **Automate timekeeping** — manage dozens of ZKTeco/NGTeco fingerprint devices across
-  branch offices without sending technicians for every config change.
-- **Connect the field** — enable marketing and field crews to log inquiries, campaigns, and
-  saturation visits from a phone, tied to a shared Branch → Office → Municipality →
-  Barangay → Purok geography.
-- **Modernize the back office** — migrate 20+ years of legacy pension data and keep daily
-  reconciliation auditable.
-
----
+- **Disconnected data sources** — Legacy pension and ILV databases, standalone biometric time-attendance machines per branch, and paper-based field operations with no unified view.
+- **Hardware fragmentation** — Dozens of ZKTeco and NGTeco fingerprint devices across branch offices, each requiring manual configuration and attendance extraction.
+- **Field operations gap** — Marketing and saturation teams needed mobile-first tooling to log inquiries, campaigns, and house-to-house visits tied to a hierarchical geographic structure.
+- **Asset visibility** — IT assets across all branches lacked centralized lifecycle tracking (procurement, assignment, maintenance, repairs, transfers).
+- **Manual reconciliation** — Pension data migration from legacy systems required chunked processing with per-row fault isolation and auditable reconciliation.
+- **Security & access control** — Strict role-based scoping by branch, office, and cluster with manager-subordinate hierarchies was required.
 
 ## The Solution — Three Interlocking Systems
 
-| # | System | What it is | Built with |
-|---|---|---|---|
-| 1 | **Web Application** | A TALL-stack ERP powering all corporate, branch, HR, marketing, and infrastructure workflows, with real-time reactive interfaces. | Laravel 13 · Livewire 4 · Alpine.js · Tailwind 3 · PostgreSQL |
-| 2 | **Desktop Hardware Tools** | Compiled Windows GUI + headless agent binaries that manage biometric hardware at every branch and sync it to the web backend. | Python 3.13 · PyInstaller · customtkinter · pyzk |
-| 3 | **Reconciliation & Automation** | Legacy data migration commands, CSV import pipelines, ledger auditors, scheduled jobs, and a cloud branch-sync server with off-site backups. | Laravel artisan · Flask · AWS S3 |
+| System | Purpose | Implementation |
+|---|---|---|
+| **1. Web Application (APCHub)** | Central ERP unifying corporate, HR, marketing, inventory and asset management, loans, ILV and pensions, chat, and tasks. | Laravel 13 · Livewire 4 · Alpine.js · Tailwind CSS 3 · PostgreSQL |
+| **2. Desktop Hardware Tools** | Branch-level biometric device management with offline capability, compiled Windows binaries that bridge proprietary TCP protocols to the web API. | Python 3.13 · PyInstaller · customtkinter · pyzk |
+| **3. Cloud Sync & Automation** | Delta-sync service, legacy data migration, CSV import pipelines, reconciliation auditors, scheduled jobs, and S3-backed backups. | Flask · Laravel Artisan Commands · AWS S3 · Scheduled Tasks |
 
-```
-┌─────────────────────────────────────────────────────────────────────┐
-│                    BRANCH OFFICES (Windows PCs)                      │
-│                                                                     │
-│  ┌─────────────────────┐   ┌──────────────────────────────────────┐ │
-│  │  ZKTeco / NGTeco    │──▶│  Desktop Tools (compiled .exe)       │ │
-│  │  fingerprint units  │   │  headless agent (daemon)             │ │
-│  │  (LAN / proprietary │◀──│  management console (GUI)            │ │
-│  │   TCP protocol)     │   │  offline device manager              │ │
-│  └─────────────────────┘   └───────────────┬──────────────────────┘ │
-└────────────────────────────────────────────┼────────────────────────┘
-                                             │ HTTPS (API key / token)
-                                             │ WebSocket (real-time)
-                 ┌───────────────────────────▼───────────────────────────┐
-                 │           Web Backend (Laravel 13)                    │
-                 │  Custom RBAC · Livewire 4 · Realtime · PostgreSQL     │
-                 │  Queues · Broadcasting · Audited activity log         │
-                 └───────────────┬───────────────────┬───────────────────┘
-                                 │                   │
-                    HTTP (API key)          DB connections
-                 ┌───────────────▼───────┐   ┌────────▼────────┐
-                 │ branch sync service   │   │ legacy pension  │
-                 │ (Flask · delta sync · │   │ database (legacy,│
-                 │  off-site backups)    │   │  + modern ILV db)│
-                 └───────────────────────┘   └─────────────────┘
-```
+## Scale & Codebase Metrics
 
----
-
-## What This Project Demonstrates
-
-A quick map of **feature → skill**, useful for evaluating fit:
-
-| You care about… | See in this project |
-|---|---|
-| **Full-stack TALL development** | Monolithic Laravel app with 88+ Livewire components across 20 modules, 100+ Eloquent models, 254 Blade views. |
-| **Real-time engineering** | WebSocket broadcasting for chat (presence, read receipts, reactions), live biometric device telemetry, and reactive UI — with queue workers and background polling fallbacks. |
-| **Authorization design** | A custom RBAC system (roles + direct permissions, manager-subordinate hierarchies, per-button visibility) — not a package drop-in. |
-| **Security hardening** | Custom 2FA, session fingerprinting, forced password rotation, soft deletes, security headers, per-route middleware contracts, and a global audit log. |
-| **Mobile-first UI** | The largest workflows (asset management, marketing field ops) are designed and built for 320px phones first, then progressively enhanced. |
-| **Hardware + embedded integration** | Biometric devices speaking a proprietary TCP protocol, bridged through compiled Windows agents with write-verify loops and self-update. |
-| **Legacy migration** | Moving tens of thousands of rows from a pre-2000s legacy DB into a modern schema, with per-row fault isolation and reconciliation audits. |
-| **Automation & operations** | Scheduled jobs (billing generation, reminders, device health), CSV import pipelines with heuristic column repair, and delta-sync with off-site backup. |
-
-**Scale today**: 208 migrations · ~105 Eloquent models · ~88 Livewire components ·
-76 controllers · 21 artisan commands · 14 broadcast events.
-
----
+| Metric | Count | Notes |
+|---|---|---|
+| **Migrations** | 263 | Spanning 2025–2026, covering core entities, asset management, performance evaluations, biometric fingerprint transfers, and system extensions. |
+| **Eloquent Models** | 129 | Namespaced by domain (AssetManagement, Marketing, Chat, Biometric, HR, Rental, Loans, CITD, ILV, and related modules). |
+| **Livewire Components** | 107 | Across module directories; largest: Marketing (14), AssetManagement (11), Inventory (9), HR (9), Rental (9), Admin (8). |
+| **Blade Views** | 323 | Including 26 asset specification partials, mobile-optimized layouts, and module-specific views. |
+| **Controllers** | 63 | Web, API (including biometric agent endpoints), and module controllers. |
+| **Artisan Commands** | 39 | Imports, migrations, audits, reminders, backups, and device utilities. |
+| **Routes** | 401 | Web, API, auth, channels, and console routes with deliberate ordering of custom routes before resource routes. |
+| **Broadcast Events** | 16 | Real-time device telemetry, chat messaging, passbook releases, and biometric command dispatch. |
+| **Services/Middleware** | 17 Services, 15 Middleware | Middleware configured in `bootstrap/app.php`. Queue workers run via `php artisan queue:listen`. |
+| **Seeders** | 23 | Including role and permission seeding, sample asset data, and system initialization data. |
+| **Tests** | 62 | Feature (49) and Unit (4) tests covering RBAC, asset management workflows, biometrics, chat, rentals, and system behavior. |
+| **Python Tools** | 7 | `local_agent`, `management_console`, `ZKTecoCentral`, `ZKTecoOnline`, `register_tool`, `fingerprint_reducer`, `rebuilt_id_bio`. |
 
 ## Feature Highlights
 
-### 🏢 Corporate & Operations
+### Corporate Operations & Core ERP
+- **APCHub System Portal** — Role-based landing page directing users to authorized subsystems based on assigned roles and permissions.
+- **Kanban Task Board** — Hierarchy-scoped task management via `TaskAccessService`. Supports coordinators (up to three designated users with department and cluster scopes), department heads (Collection, CITD, Finance), cluster heads, branch managers, and self-assignment rules. Visibility is determined by organizational scope rather than broad permission flags.
+- **Inventory Management** — Multi-office inventory with cross-office fulfillment, bulk actions, and ledger exports.
+- **Asset Management (Mobile-First)** — 31 asset types with dedicated and shared detail tables, a three-step wizard form with deferred binding on specification fields, QR code generation, maintenance, repair, and transfer workflows, dashboard KPIs with indexed aggregates, and PDF exports. Designed for field use on 320-pixel and larger viewports.
+- **Passbook and ATM Release Management** — SLA-tracked dashboard with live collection index updates via broadcasting.
+- **Customer Ledger & Loans** — Real-time loan account views, transaction history, and absolute balance calculations.
+- **ILV & Pension Processing** — Initial Loan Voucher encoding with cross-checks against GSIS and Old-Age pensioner data. PostgreSQL pg_trgm powers fuzzy full-name search. Separate ILV database connections maintain data boundaries.
+- **Leave Management** — Accrual tracking, leave balances, shared calendars, and approval workflows.
+- **Internal Chat** — Real-time messaging with image sharing, reactions, read receipts, and presence channels.
+- **Public Loan Document Generator** — Throttled guest form generating branded DOMPDF loan documents.
 
-- **System Hub** — a centralized portal where personnel reach the subsystems relevant to
-  their role.
-- **Kanban Task Board** — column lanes with subtasks, attachments, and automated audit logs.
-- **Inventory System** — full asset lifecycle with cross-office fulfillment, bulk actions,
-  and multi-format ledger exports. *(Mobile-first: asset cards, QR access, field-friendly.)*
-- **Passbook / ATM Release Management** — SLA-tracking dashboard with color-coded status
-  badges and live "collection index" updates.
-- **Customer & Loan Ledger** — real-time account views, deep transaction history, and
-  absolute balance calculations.
-- **ILV & Pension Processing** — digital encoding of Initial Loan Vouchers and cross-checks
-  against the central GSIS/Old-Age pensioner database with full-name search.
-- **Leave Management** — accrual tracking, shared calendars, and admin/HR approval flows.
-- **Internal Chat** — image sharing, reactions, read receipts, and presence.
-- **Public Loan Document Generator** — throttled guest form producing branded PDFs.
+### Marketing & Field Sales (Mobile-Optimized)
+- **Marketing Dashboard** — Conversion rates, branch efficiency, and office KPIs with drill-downs and cached analytics with a 60-second time-to-live.
+- **Client Inquiries** — End-to-end lead pipeline with encoder-to-assigned-to-credited flow and a two-level checker workflow.
+- **Field Saturation** — Mobile-first ground-crew logging with GPS coordinates and photo uploads for house-to-house visits.
+- **Campaigns & Promotions** — Campaign lifecycle tracking, file-check verification, and conversion metrics.
+- **Agent Management & Clusters** — CRG agent distribution across branches, clusters, and territories. The Cluster Portal is restricted to users with `admin` or `marketing-head` roles.
+- **Location Hierarchy** — Shared five-level geography: Branch → Office → Municipality → Barangay → Purok, reused across modules.
+- **Comprehensive Reports** — Unified analytics with 12 filters, 6 tabs, and CSV exports.
 
-### 📢 Marketing & Sales
+### HR, People Operations & Evaluations
+- **My Attendance** — Employee self-service for biometric punches, shift history, and discrepancy flags.
+- **201 Files** — Digital employee repository with comprehensive fields, contracts, validations, background checks, and PDF export.
+- **Job Applications Portal** — Public career funnel with 2×2 professional photos, digital signatures, and automatically generated candidate PDF profiles.
+- **Trainee Evaluations** — Quantitative onboarding scoring with monthly-anniversary reminders.
+- **Quarterly Performance Evaluations** — Hierarchy-scoped workspace with strict enforcement: exactly one evaluation per evaluatee per quarter via a unique database constraint. Evaluator resolution follows a defined chain (Branch Manager, fallback to Cluster Head if none; Cluster Heads evaluated by Operation Manager, otherwise HR-only). Includes an HR-exclusive Company Rules & Regulation rating folded into the computed final average, percentage, and qualitative rating. Supports card and list views, HR inline rating modal, and CSV/PDF exports. Superseded evaluations are archived.
+- **Memorandums & Team Conduct** — Internal distribution, error reports, and progressive disciplinary records.
 
-- **Analytics Dashboard** — conversion rates, branch efficiency, and office KPIs with
-  drill-down filtering.
-- **Client Inquiries** — a lead pipeline (encoder → assigned → credited) with a two-level
-  checker workflow and cross-branch endorsements.
-- **Field Saturation** — mobile-friendly ground-crew logs with GPS coordinates and photo
-  uploads for house-to-house visits.
-- **Campaigns & Promos** — lifecycle tracking, file-check verification, and conversion
-  metrics.
-- **Agent Management & Clusters** — CRG agent distribution across branches, clusters, and
-  territories.
-- **Location Hierarchy** — a shared 5-level Branch → Office → Municipality → Barangay →
-  Purok geography reused across every module.
-
-### 👥 HR & People Operations
-
-- **My Attendance** — employee self-service for biometric punches, shift history, and
-  discrepancy flags.
-- **Memorandums & Team Conduct** — internal distribution and progressive disciplinary records.
-- **201 Files** — digital employee depository (applications, contracts, validations) with
-  PDF export.
-- **Public Job Applications Portal** — career funnel with image handling, digital
-  signatures, and auto-generated candidate profiles.
-- **Trainee Evaluations** — onboarding scoring with automated monthly-anniversary reminders.
-
-### 🖥️ Administration & Infrastructure
-
-- **Biometrics Manager** — a central console that monitors remote fingerprint devices and
-  dispatches commands in real time through the branch agents.
-- **Branch Hierarchy** — chain-of-command scopes with recursive subordinate resolution.
-- **Users & Permissions** — provisioning, forced security adjustments, and authorization
-  profiles mapped to per-button visibility.
-- **Server Health Monitor** — storage, memory, and database-backup validation.
-- **System Activity Logs** — an immutable audit stream recorded across every mutation.
-
----
+### Administration, Infrastructure & Biometrics
+- **Biometrics Manager** — Central console monitoring remote devices with live connected, syncing, and disconnected states driven by Python agents and WebSocket broadcasting.
+- **Branch Hierarchy** — Multi-tier manager relationships with recursive subordinate resolution for scope enforcement.
+- **Users & Permissions** — Custom role-based access control with 138 permission slugs across 14 groups (Inventory, Management, Chat, Biometrics, HR, Marketing, Rental, Collections, CITD, ILV, Loans, Leave, Finance, Asset Management, External Inventory, and Suggestions).
+- **System Control Panel** — Global configurations and department-level tuning.
+- **Server Health Monitor** — Storage, memory, and database-backup validation dashboard.
+- **System Activity Logs** — Immutable audit trail via `LogsActivity` trait and `GlobalActivityLogger` middleware. Captures model type, identifier, action, IP address, user agent, status, and details. Activity logs are retained for 90 days with scheduled pruning.
+- **Biometric Fingerprint Transfers** — Fingerprint template transfer tracking between devices and users.
 
 ## Technical Architecture
 
-### Web Application Core
+### Backend Core
+- **Framework**: Laravel 13.31 on PHP 8.4+
+- **Full-Stack Reactivity**: Livewire 4 with `#[Layout('layouts.app')]` pattern across major pages
+- **Client State**: Alpine.js 3.x with collapse and focus plugins
+- **Assets**: Vite 6 with Tailwind CSS 3.4, PostCSS, and Autoprefixer
+- **Queues**: Database driver (development uses `php artisan queue:listen --tries=1`)
+- **Broadcasting**: Laravel Reverb (development) or Pusher (production) via Laravel Echo
 
-- **Laravel 13 / PHP 8.3+** with full-page Livewire 4 components (`#[Layout('layouts.app')]`)
-  across 20 module directories — high-fidelity reactive components with minimal raw JS.
-- **Alpine.js** for client-side state and UI behavior; **Tailwind CSS 3** for a density-aware,
-  mobile-first design system.
-- **Supporting libraries**: Tom Select (searchable multi-selects), Spotlight.js (lightbox),
-  Chart.js (analytics), Tribute (mentions), xlsx (spreadsheet export), toastr (feedback).
+### Custom Role-Based Access Control
+The system implements a custom RBAC model (separate from package-based solutions) for precise organizational scoping:
+
+```php
+// Core methods on User model
+hasPermissionTo($permission)  // Merges role and direct permissions
+hasAnyRole($roles)            // Matches pipe or comma-separated slugs and names
+hasGlobalAccess()             // Grants access for admin, inventory-manager, auditor
+getAllSubordinateIds()        // Recursively traverses manager hierarchy
+```
+
+- **Pivots**: `role_user` and `permission_user` matching on `slug` or `name`
+- **Hierarchies**: Cluster Head → Branch Manager → Branch Assistant, with recursive resolution
+- **Task Board**: `TaskAccessService` derives view and assign rights from hierarchy plus `task_coordinators` (maximum 3) with `task_coordinator_scopes` (departments and clusters)
+- **Office Scoping**: Users without `manage-assets` permission are restricted to their assigned `office_id`. Global access is granted to authorized managers. Scoping is enforced in query builders and re-validated on each request.
+
+### Middleware Stack (`bootstrap/app.php`)
+| Middleware | Purpose |
+|---|---|
+| `HandleAjaxAuthenticationRedirect` | Returns 401 JSON for expired AJAX sessions |
+| `CheckIfUserIsSoftDeleted` | Blocks access for soft-deleted users |
+| `EnsurePasswordIsChanged` | Forces password change when required |
+| `VerifySessionFingerprint` | Session hijack protection based on User-Agent |
+| `AddSecurityHeaders` | Applies security headers (nosniff, X-Frame-Options SAMEORIGIN, HSTS, Permissions-Policy, strips X-Powered-By) |
+| `GlobalActivityLogger` | Audits POST, PUT, PATCH, and DELETE mutations |
+| `AuthenticateBiometricAgent` | Authenticates biometric agents via `X-Biometric-Key`, Bearer token, or `api_key` |
+| `CheckSystemStatus` | Enforces maintenance mode via `Setting('site_maintenance')` |
 
 ### Real-Time Layer
-
-- Broadcasting via **Laravel Echo** on **Pusher** (production) or **Laravel Reverb** (local).
-- Channel authorization is deliberately decoupled from Eloquent to avoid relationship
-  caches and keep authorization fast.
-- Real-time surfaces: private chat & presence, per-device biometric command dispatch and
-  log streaming, device online/offline state, and live collection-index refresh.
-
-### Custom Authorization (RBAC)
-
-Built on `role_user` / `permission_user` pivot tables matching on `slug` **or** `name` —
-deliberately not a package drop-in:
-
-- `hasPermissionTo()` merges role + direct permissions; `hasAnyRole()` matches pipe-separated
-  role strings.
-- `getAllSubordinateIds()` recursively traverses the manager tree (cluster head → branch
-  manager → assistant).
-- ~90 permission slugs across 14 groups; a separate seeder maps UI actions to slugs for
-  per-button visibility.
-
-### Security
-
-- **Custom two-factor authentication** (no third-party package).
-- Registration disabled; throttled login and public forms.
-- **Session fingerprinting** (logs out on User-Agent change), **security headers** on every
-  response, and **soft deletes** on users.
-- Middleware chain enforced in `bootstrap/app.php`: global activity logger, password-change
-  enforcer, fingerprint verifier, soft-delete guard, security headers, and AJAX-aware auth
-  redirects.
-- Biometric agents authenticate to the API with per-device API keys.
+- **Channel Authorization**: Bypasses Eloquent in `routes/channels.php` using `DB::table()` to avoid relationship caching in real-time authorization checks
+- **Private Channels**: `conversation.{id}`, `biometric.device.{officeId}`, `App.Models.User.{id}`
+- **Presence Channels**: `chat`
+- **Broadcasting Surfaces**: `biometrics-status`, `passbook-releases`
+- **Events** (16 total, primarily `ShouldBroadcastNow`): `DeviceCommandDispatched`, `BiometricDeviceStatusUpdated`, `MessageSent`, `PassbookReleaseUpdated`, and chat events for messages, reactions, and read receipts
 
 ### Data Layer
-
-- **PostgreSQL** (production) with `pg_trgm`-powered fuzzy search on pensioner data; SQLite
-  for local development.
-- Legacy pension system accessed through a dedicated DB connection, migrated into the modern
-  schema via artisan commands.
-- Notable schemas: biometric records with composite-unique integrity, offices with a custom
-  primary key, JSON audit footprints on invoices, asset detail tables for 31 asset types, and
-  denormalized search columns for fast lookups.
-
----
-
-## Edge & Automation Engineering
-
-### Branch Desktop Tooling (Python)
-
-A suite of PyInstaller-compiled, windowed binaries that interact directly with fingerprint
-hardware over the LAN:
-
-- **Headless background agent** — a single-instance daemon (Win32 mutex) that polls the
-  backend for commands, pushes attendance, auto-recovers the device, and **self-updates its
-  own binary**.
-- **Adaptive polling** — 60s during peak windows, 600s off-peak, interrupted instantly when a
-  WebSocket command arrives.
-- **A "universal" hardware adapter** — one adapter handles both major device vendors,
-  including hand-packing proprietary protocol buffers where the standard library breaks.
-  Device discovery falls back to a 100-worker parallel sweep of local subnets.
-- **Trust-but-verify writes** — users are pushed, re-read, and count-verified; failed PINs
-  retried with hardware cooling delays to protect device flash memory.
-- **Management console GUI** — a dual-pane *Live Cloud vs Local Hardware* sync dashboard with
-  a 10-finger enrollment grid, device settings editor, and an in-app terminal.
-- **Fully offline device manager** — a CSV-master tool with upload/harvest arrows, template
-  backup/restore, encoding selectors, and de-fragmentation of a broken vendor read path.
-- **Safety discipline** — CSV backups before destructive operations, device disable/enable
-  around bulk changes, and crash reports posted back to the server.
-
-### Cloud Branch-Sync Service (Flask)
-
-- Authenticated delta-sync hub for branch PCs: a client posts a file manifest, the server
-  diffs by size + mtime, and streams back only what's missing.
-- Every sync is **mirrored to off-site object storage** as the durable store — local disk is
-  only a cache.
-- A manager dashboard drives update distribution, force-sync queues, smart pulls, and
-  full-branch downloads.
-
-### Data Migration & Reconciliation (Laravel)
-
-- **Legacy migration** — tens of thousands of rows from the legacy pension DB (including old
-  DBF tables) into the modern schema: chunked processing, per-row fault isolation, and status
-  normalization.
-- **CSV import pipelines** with real-world repair logic — encoding repair, suffix-aware name
-  parsing, misplaced-column realignment, and scientific-notation phone repair.
-- **Reconciliation audits** — e.g., a deposit-ledger auditor that reconstructs balances from
-  transactions and fails the build on drift.
-- **Scheduled jobs** — device health monitoring, automated monthly rent billing with
-  advance-payment dedupe, birthday/evaluation reminders, log pruning, and reservation cleanup.
-
----
-
-## Tech Stack
-
-| Layer | Technologies |
-|---|---|
-| Backend | PHP 8.3+ · Laravel 13 · Livewire 4 · Artisan (21 commands) |
-| Frontend | Blade · Alpine.js · Tailwind CSS 3 · Vite 6 · Tom Select · Chart.js |
-| Data | PostgreSQL · SQLite (dev) · legacy MySQL/DBF imports |
-| Real-time | Pusher (prod) · Laravel Reverb (dev) · Laravel Echo |
-| Queues | Database-driven queue workers |
-| Edge hardware | Python 3.13 · PyInstaller · customtkinter · pyzk · ZKTeco/NGTeco devices |
-| Automation | Flask (branch sync) · AWS S3 (backups) · cron/scheduler |
-| Ops | Docker (agent container) · bash deploy script · GitHub Actions |
-
----
-
-## Developer Setup
-
-```bash
-# 1. Clone and install
-composer install
-npm install
-
-# 2. Environment
-cp .env.example .env
-#    configure DB_* / PUSHER_* (or Laravel Reverb for local),
-#    APP_TIMEZONE=Asia/Manila
-
-php artisan key:generate
-
-# 3. Database + seed
-php artisan migrate:fresh --seed
-php artisan storage:link
-
-# 4. Assets
-npm run build      # production build
-npm run dev        # Vite dev server with HMR
-
-# 5. Run the stack (server + queue + websocket + logs concurrently)
-composer dev
-```
-
-### Testing
-
-```bash
-composer test    # config:clear && php artisan test
-```
-
----
-
-## Repository Layout
-
-```
-├── app/
-│   ├── Console/Commands/      # 21 artisan commands (imports, audits, reminders)
-│   ├── Http/Controllers/      # 76 controllers incl. hardware-agent + ADMS surfaces
-│   ├── Livewire/              # ~88 components across 20 modules
-│   ├── Models/                # ~105 models, sub-namespaced by domain
-│   ├── Services/              # chat, attendance, parsing services
-│   └── Traits/                # auditable-actions trait
-├── bootstrap/app.php          # middleware / config entrypoint (Laravel 11+ pattern)
-├── database/migrations/       # 208 migrations (2025 → 2026)
-├── routes/                    # web / api / auth / channels / console
-├── resources/views/           # 254 Blade views + Livewire partials
-├── cloud_server.py            # branch delta-sync service (Flask, S3-backed)
-├── local_agent.py             # headless biometric agent (Windows daemon)
-├── management_console.py      # cloud-sync management GUI
-├── ZKTecoCentral.py           # offline CSV-master device manager
-├── *.spec                     # PyInstaller build definitions
-├── deploy.sh                  # production deploy script
-└── Dockerfile                 # containerized Python agent
-```
-
----
-
-## Notes for Reviewers
-
-- **Mobile-first is a design requirement** in this project, not a phase: every modified UI is
-  built for ~320px first and progressively enhanced to desktop.
-- **Authorization was engineered custom** rather than adopted — the pattern is documented
-  above so evaluators can inspect the decision-making.
-- Production data, credentials, and internal URLs are intentionally omitted from this
-  repository. Contact the author for a live walkthrough or an in-depth technical review.
+- **Primary Database**: PostgreSQL (production); SQLite (local development)
+- **Legacy Connections**: `mysql_legacy` (legacy pension database) and separate `DB_ILV_*` connection for the modern ILV module
+- **Key Patterns**:
+  - `offices` table uses custom primary key `OfficeID` — all relationships must explicitly reference this key
+  - `biometric_records` has composite unique index on `[biometric_device_id, device_user_id, timestamp]`
+  - `DeviceLog` has `$timestamps = false` and manages `created_at` via model boot events
+  - `logs` table powers immutable activity auditing (90-day retention via scheduled pruning)
+  - `performance_evaluations` has unique constraint on `(period, evaluatee_id)` enforcing one evaluation per quarter; superseded evaluations are archived to `performance_evaluations_archive`
+  - pg_trgm extension supports fuzzy matching for pensioner searches
+  - Biometric PIN normalization: `ltrim($id, '0') ?: '0'` applied consistently across backend and edge agents
